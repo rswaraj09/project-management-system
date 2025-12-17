@@ -18,47 +18,93 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import java.util.Arrays;
 import java.util.Collections;
 
+//@Configuration
+//@EnableWebSecurity
+//public class AppConfig  {
+//    @Bean
+//    public SecurityFilterChain securityFilterChain(HttpSecurity http)throws Exception{
+//        http.sessionManagement(Management -> Management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//                .authorizeHttpRequests(Authorize -> Authorize.requestMatchers("/api/**").authenticated()
+//                        .anyRequest().permitAll())
+//                .addFilterBefore(new JwtTokenValidator(), BasicAuthenticationFilter.class)
+//                .csrf(csrf ->csrf.disable())
+//                .cors(cors ->cors.configurationSource(corsConfigurationSource()));
+//        return http.build();
+//    }
+//
+//    private CorsConfigurationSource corsConfigurationSource() {
+//        return new CorsConfigurationSource() {
+//            @Override
+//            public  CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+//                CorsConfiguration cfg = new CorsConfiguration();
+//                cfg.setAllowedOrigins(Arrays.asList(
+//                        "http://localhost:3000",
+//                        "http://localhost:5173",
+//                        "http://localhost:4200"
+//
+//                ));
+//                cfg.setAllowedMethods(Collections.singletonList("*"));
+//                cfg.setAllowCredentials(true);
+//                cfg.setAllowedHeaders(Collections.singletonList("*"));
+//                cfg.setExposedHeaders(Arrays.asList("Authorization"));
+//                cfg.setMaxAge(3600L);
+//                return cfg;
+//            }
+//        };
+//
+//
+//        }
+//    @Bean
+//    PasswordEncoder passwordEncoder(){
+//        return new BCryptPasswordEncoder();
+//
+//
+//    }
+//
+//
+//}
 @Configuration
 @EnableWebSecurity
-public class AppConfig  {
-    SecurityFilterChain securityFilterChain(HttpSecurity http)throws Exception{
-        http.sessionManagement(Management -> Management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(Authorize -> Authorize.requestMatchers("/api/**").authenticated()
-                        .anyRequest().permitAll())
-                .addFilterBefore(new JwtTokenValidator(), BasicAuthenticationFilter.class)
-                .csrf(csrf ->csrf.disable())
-                .cors(cors ->cors.configurationSource(corsConfigurationSource()));
+public class AppConfig {
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
+        http
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/**").authenticated()
+                        .requestMatchers("/auth/**").permitAll()   // ✅ allow signup & signin
+                        .anyRequest().permitAll()
+                )
+                .addFilterBefore(new JwtTokenValidator(), BasicAuthenticationFilter.class);
+
         return http.build();
     }
 
     private CorsConfigurationSource corsConfigurationSource() {
-        return new CorsConfigurationSource() {
-            @Override
-            public  CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-                CorsConfiguration cfg = new CorsConfiguration();
-                cfg.setAllowedOrigins(Arrays.asList(
-                        "http://localhost:3000",
-                        "http://localhost:5173",
-                        "http://localhost:4200"
-
-                ));
-                cfg.setAllowedMethods(Collections.singletonList("*"));
-                cfg.setAllowCredentials(true);
-                cfg.setAllowedHeaders(Collections.singletonList("*"));
-                cfg.setExposedHeaders(Arrays.asList("Authorization"));
-                cfg.setMaxAge(3600L);
-                return cfg;
-            }
+        return request -> {
+            CorsConfiguration cfg = new CorsConfiguration();
+            cfg.setAllowedOrigins(Arrays.asList(
+                    "http://localhost:3000",
+                    "http://localhost:5173",
+                    "http://localhost:4200"
+            ));
+            cfg.setAllowedMethods(Collections.singletonList("*"));
+            cfg.setAllowedHeaders(Collections.singletonList("*"));
+            cfg.setExposedHeaders(Collections.singletonList("Authorization"));
+            cfg.setAllowCredentials(true);
+            cfg.setMaxAge(3600L);
+            return cfg;
         };
-
-
-        }
-    @Bean
-    PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
-
-
     }
 
-
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 }

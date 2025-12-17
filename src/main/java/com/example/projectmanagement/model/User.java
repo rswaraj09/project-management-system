@@ -3,8 +3,8 @@ package com.example.projectmanagement.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.jspecify.annotations.Nullable;
 
-import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +24,8 @@ public class User {
 
     private int projectSize;
 
+    public String getfullName() {return  this.fullName;}
+
     public String getEmail() { // This method needs to exist
         return this.email;
     }
@@ -31,4 +33,14 @@ public class User {
     public String getPassword() { // This method needs to exist
         return this.password;
     }
+
+    public void setPassword(@Nullable String encode){
+    }
+
+    public void setEmail(String email) {
+    }
+    public void setfullName(String fullName) {
+    }
+
+
 }
