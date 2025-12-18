@@ -31,7 +31,7 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    private CustomUserDetailsImpl customerUserDetailsImpl;
+    private CustomUserDetailsImpl customerUserDetails;
 
     @PostMapping("/signup")
     public ResponseEntity<AuthResponse>createUserHandler(@RequestBody User user) throws Exception {
@@ -49,7 +49,7 @@ public class AuthController {
         Authentication authentication=new UsernamePasswordAuthenticationToken(user.getEmail(),user.getPassword());
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String jwr= JwtProvider.generateToken(authentication);
+        String jwt= JwtProvider.generateToken(authentication);
 
         AuthResponse res = new AuthResponse();
         res.setMessage("signup success");
@@ -59,13 +59,13 @@ public class AuthController {
     }
 
     @PostMapping("/signing")
-    public ResponseEntity<AuthResponse> siging(@RequestBody LoginRequest loginRequest){
+    public ResponseEntity<AuthResponse> signing(@RequestBody LoginRequest loginRequest){
         String username= loginRequest.getEmail();
         String password= loginRequest.getPassword();
 
-        Authentication authentication=authenticate();
+        Authentication authentication=new UsernamePasswordAuthenticationToken(username,password);
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwr= JwtProvider.generateToken(authentication);
+        String jwt= JwtProvider.generateToken(authentication);
 
         AuthResponse res = new AuthResponse();
         res.setMessage("signing success");
@@ -74,9 +74,9 @@ public class AuthController {
         return new ResponseEntity<>(res, HttpStatus.CREATED);
     }
 
-    private Authentication authenticate() {
-        UserDetails userDetails= customeUserDetails.loadUserByUsername(username);
-        if(userDetails==null){{
+    private Authentication authenticate(String username, String password) {
+        UserDetails userDetails= customerUserDetails.loadUserByUsername(username);
+        if(userDetails==null){
         throw new BadCredentialsException("invalid username");
         }
         if(!passwordEncoder.matches(password,userDetails.getPassword())){
@@ -86,4 +86,4 @@ public class AuthController {
         }
     }
 
-}
+
